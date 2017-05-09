@@ -1,0 +1,83 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <script src="js/app/models/Negociacao.js"></script>
+    <script>
+
+        let conexao;
+        const openRequest = window.indexedDB.open('aluraframe', 4);
+
+        openRequest.onupgradeneeded = e => {
+            console.log('Cria ou altera um banco ja existente');
+
+            const minhaConexao = e.target.result;
+            if (minhaConexao.objectStoreNames.contains('negociacoes')) {
+                minhaConexao.deleteObjectStore('negociacoes');
+            }
+            minhaConexao.createObjectStore('negociacoes', { autoIncrement: true});
+        };
+        
+        openRequest.onsuccess = e => {
+            console.log('Quando consegue uma conexao com sucesso');
+            conexao = e.target.result;
+        };
+
+        openRequest.onerror = e => {
+            console.log('Algum problema');
+            console.log(e.target.error);
+        };
+
+        function adiciona() {
+            let transation = conexao.transaction(['negociacoes'], 'readwrite');
+            let store = transation.objectStore('negociacoes');
+            let negociacao = new Negociacao(new Date(), 1, 100);
+            let req = store.add(negociacao);
+
+            req.onsuccess = e => {
+                console.log('negociacao incluida com sucesso!');
+            };
+
+            req.onerror = e => {
+                console.log('não foi possivel adicionar a negociacao!');
+            };
+
+        }
+
+        function listaTodos() {
+            let transation = conexao.transaction(['negociacoes'], 'readwrite');
+            let store = transation.objectStore('negociacoes');
+            let cursor = store.openCursor();
+            let negociacoes = [];
+
+            cursor.onsuccess = e => {
+                let atual = e.target.result;
+                if (atual) {
+                    let dado = atual.value;
+
+                    negociacoes.push(new Negociacao(dado._data, dado._quantidade, dado._valor));
+                    atual.continue();
+                } else {
+                    console.log(negociacoes);
+                }
+            };
+
+            cursor.onerror = e => {
+                console.log('Erro ao recuperar negociacoes!');
+            }
+        }
+
+        ConnectionFactory
+            .getConnection()
+            .then(con => {
+               // Usa a conexao
+            });
+    </script>
+</body>
+</html>
