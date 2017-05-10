@@ -1,8 +1,9 @@
-class Mensagem {
+export class Mensagem {
     
-    constructor(texto='') {
+    // constructor(texto='') {
+    constructor(texto) {
         
-        this._texto = texto;
+        this._texto = texto || '';
     }
     
     get texto() {

@@ -8,18 +8,14 @@
     "build": "babel js/app-es6 -d js/app --source-maps",
     "watch": "babel js/app-es6 -d js/app --source-maps --watch"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/lmadams/alura-es6-III.git"
-  },
   "author": "",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/lmadams/alura-es6-III/issues"
-  },
-  "homepage": "https://github.com/lmadams/alura-es6-III#readme",
   "devDependencies": {
-    "babel-cli": "^6.24.1",
-    "babel-preset-es2015": "^6.24.1"
+    "babel-cli": "^6.10.1",
+    "babel-plugin-transform-es2015-modules-systemjs": "^6.9.0",
+    "babel-preset-es2015": "^6.9.0"
+  },
+  "dependencies": {
+    "systemjs": "^0.19.31"
   }
 }

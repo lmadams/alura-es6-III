@@ -1,56 +1,70 @@
-const ConnectionFactory = (function () {
-    const stores = ['negociacoes'];
-    const version = 4;
-    const dbName = 'aluraframe';
-    let close = null;
-    let connection = null;
+const stores = ['negociacoes'];
+const version = 4;
+const dbName = 'aluraframe';
 
-    return class ConnectionFactory {
+let connection = null;
 
-        constructor() {
-            throw new Error('Não é possivel criar instancias de ConnectionFactory');
-        }
+let close = null;
 
-        static getConnection() {
-            return new Promise((resolve, reject) => {
-                const openRequest = window.indexedDB.open(dbName, version);
+export class ConnectionFactory {
 
-                openRequest.onupgradeneeded = e => {
-                    ConnectionFactory._createStores(e.target.result);
-                };
+    constructor() {
 
-                openRequest.onsuccess = e => {
-                    if ( !connection ) {
-                        connection = e.target.result;
-                        close = connection.close.bind(connection);
-                        connection.close = function() {
-                            throw new Error('Você não pode fechar diretamente a conexão!');
-                        }
-                    }
-                    resolve(connection);
-                };
+        throw new Error('Não é possível criar instâncias de ConnectionFactory');
+    }
 
-                openRequest.onerror = e => {
-                    console.log(e.target.error);
-                    reject(e.target.error.name);
-                };
-            });
-        }
+    static getConnection() {
+        
+        return new Promise((resolve, reject) => {
 
-        static _createStores(connection) {
-            stores.forEach(store => {
-                if (connection.objectStoreNames.contains(store)) {
-                    connection.deleteObjectStore(store);
+            let openRequest = window.indexedDB.open(dbName, version);
+
+            openRequest.onupgradeneeded = e => {
+
+                ConnectionFactory._createStores(e.target.result);
+
+            };
+
+            openRequest.onsuccess = e => {
+
+                if(!connection) {
+                    connection = e.target.result;
+                    close = connection.close.bind(connection);
+                    connection.close = function() {
+                        throw new Error('Você não pode fechar diretamente a conexão');
+                    };
                 }
-                connection.createObjectStore(store, { autoIncrement: true});
-            });
-        }
+                resolve(connection);
 
-        static closeConnection() {
-            if (connection) {
-                close();
-                connection = null;
-            }
+            };
+
+            openRequest.onerror = e => {
+
+                console.log(e.target.error);
+
+                reject(e.target.error.name);
+            };
+
+        });
+    }
+
+    static _createStores(connection) {
+
+        stores.forEach(store => {
+
+            if (connection.objectStoreNames.contains(store)) connection.deleteObjectStore(store);
+            connection.createObjectStore(store, { autoIncrement: true});
+
+        });
+
+    }
+
+    static closeConnection() {
+
+        if(connection) {
+            close();
+            connection = null;
+            close = null;
         }
     }
-})();
+}
